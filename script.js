@@ -1,9 +1,20 @@
 const inputBar = document.querySelector("#input");
+const letterNodes = Array.from(document.querySelectorAll(".letterDisplay"));
 
-inputBar.addEventListener("keydown", (e) => {
+inputBar.addEventListener("keyup", (e) => {
+  const stringithing = inputBar.value;
+
+  const arrayedStringithing = stringithing.split("");
+
+  letterNodes.map((span, number) => {
+    if (!(arrayedStringithing[number] === undefined)) {
+      span.innerHTML = arrayedStringithing[number].toUpperCase();
+    } else {
+      span.innerHTML = " ";
+    }
+  });
+
   if (e.key === "Enter") {
-    const stringithing = inputBar.value;
-
     const inputData = stringithing.match(/.{1,4}/g).map((row) => {
       return row.split("");
     });
