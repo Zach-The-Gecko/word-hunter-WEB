@@ -1,5 +1,6 @@
 const inputBar = document.querySelector("#input");
 const letterNodes = Array.from(document.querySelectorAll(".letterDisplay"));
+const finalDisplay = document.querySelector("#display");
 
 inputBar.addEventListener("keyup", (e) => {
   const stringithing = inputBar.value;
@@ -129,6 +130,7 @@ inputBar.addEventListener("keyup", (e) => {
           });
         });
       console.log(words.sort((a, b) => b.length - a.length));
+      finalDisplay.innerHTML = words.sort((a, b) => b.length - a.length);
     };
 
     findWords();
