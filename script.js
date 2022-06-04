@@ -1,6 +1,8 @@
 const inputBar = document.querySelector("#input");
 const letterNodes = Array.from(document.querySelectorAll(".letterDisplay"));
+const rows = Array.from(document.querySelectorAll(".row"));
 const finalDisplay = document.querySelector("#display");
+const loadingBar = document.querySelector("#bar");
 
 inputBar.addEventListener("keyup", (e) => {
   const stringithing = inputBar.value;
@@ -74,6 +76,7 @@ inputBar.addEventListener("keyup", (e) => {
 
     const doesThisWordWork = (letterObj, word) => {
       let lettersWeAreOn = [letterObj];
+      let lettersUsed = [];
       Array.from(word).map((letterInWord) => {
         let pathsThatWork = lettersWeAreOn.filter((possibleLetter) => {
           return possibleLetter.letter == letterInWord;
@@ -100,11 +103,14 @@ inputBar.addEventListener("keyup", (e) => {
       });
       gameBoard.map((row) => {
         row.map((letterObj) => {
+          if (!letterObj.interactable) {
+            lettersUsed.push(letterObj);
+          }
           letterObj.interactable = true;
         });
       });
       if (lettersWeAreOn.length > 0) {
-        return true;
+        return lettersUsed;
       } else {
         return false;
       }
@@ -119,18 +125,53 @@ inputBar.addEventListener("keyup", (e) => {
           const realData = data.split("\n").filter((word) => {
             return word.length >= 3;
           });
-          gameBoard.map((row) => {
-            row.map((letterObj) => {
+          gameBoard.map((row, rowNumber) => {
+            row.map((letterObj, columnNumber) => {
               realData.map((word) => {
-                if (doesThisWordWork(letterObj, word)) {
-                  words.push(word);
+                const possiblyWorked = doesThisWordWork(letterObj, word);
+                if (possiblyWorked) {
+                  words.push({
+                    word,
+                    possiblyWorked,
+                    startingLetter: letterObj,
+                  });
                 }
               });
             });
           });
         });
-      console.log(words.sort((a, b) => b.length - a.length));
-      finalDisplay.innerHTML = words.sort((a, b) => b.length - a.length);
+      const sortedList = words.sort((a, b) => b.word.length - a.word.length);
+      for (let i = sortedList[0].word.length; i >= 3; i--) {
+        let listOfLength = sortedList.filter((wordObj) => {
+          return wordObj.word.length === i;
+        });
+        const containerOfLength = document.createElement("div");
+        const headingOfLength = document.createElement("h1");
+        headingOfLength.appendChild(
+          document.createTextNode(`Words that are ${i} letters long`)
+        );
+        containerOfLength.appendChild(headingOfLength);
+        const highlightLetter = (letterObj, color) => {
+          letterNodes[
+            letterObj.row * 4 + letterObj.column
+          ].style.backgroundColor = color;
+        };
+        listOfLength.map((word) => {
+          const wordDisplay = document.createElement("p");
+          wordDisplay.appendChild(document.createTextNode(word.word));
+          wordDisplay.addEventListener("click", () => {
+            letterNodes.map((node) => {
+              node.style.backgroundColor = "lightBlue";
+            });
+            word.possiblyWorked.map((possibleLetter) => {
+              highlightLetter(possibleLetter, "#f00");
+            });
+            highlightLetter(word.startingLetter, "#ff0");
+          });
+          containerOfLength.appendChild(wordDisplay);
+        });
+        finalDisplay.appendChild(containerOfLength);
+      }
     };
 
     findWords();
